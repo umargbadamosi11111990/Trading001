@@ -13,7 +13,7 @@ class Settings:
     alpaca_base_url: str
     gmail_address: str
     gmail_app_password: str
-    sms_gateway: str
+    notify_email: str
     symbol: str = "SPY"
     timeframe: str = "1h"
     lookback_bars: int = 250
@@ -28,5 +28,5 @@ settings = Settings(
     alpaca_base_url=os.environ.get("ALPACA_BASE_URL", "https://data.alpaca.markets"),
     gmail_address=os.environ.get("GMAIL_ADDRESS", ""),
     gmail_app_password=os.environ.get("GMAIL_APP_PASSWORD", ""),
-    sms_gateway=os.environ.get("SMS_GATEWAY", "2404592841@txt.att.net"),
+    notify_email=os.environ.get("NOTIFY_EMAIL", "jayjayumar1990@gmail.com"),
 )

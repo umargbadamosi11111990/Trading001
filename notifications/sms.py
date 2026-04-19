@@ -8,7 +8,7 @@ from signals.evaluator import Signal
 log = structlog.get_logger()
 
 
-def format_sms(signal: Signal) -> str:
+def format_email(signal: Signal) -> str:
     lines = [
         "=== SPY A++ SIGNAL ===",
         f"Dir:   {signal.direction}",
@@ -24,15 +24,15 @@ def format_sms(signal: Signal) -> str:
 
 
 def send_signal_sms(signal: Signal) -> str:
-    body = format_sms(signal)
+    body = format_email(signal)
     msg = MIMEText(body)
     msg["From"] = settings.gmail_address
-    msg["To"] = settings.sms_gateway
-    msg["Subject"] = ""
+    msg["To"] = settings.notify_email
+    msg["Subject"] = f"SPY A++ {signal.direction} Signal — Score {signal.confidence}/100"
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(settings.gmail_address, settings.gmail_app_password)
-        server.sendmail(settings.gmail_address, settings.sms_gateway, msg.as_string())
+        server.sendmail(settings.gmail_address, settings.notify_email, msg.as_string())
 
-    log.info("sms.sent", to=settings.sms_gateway, direction=signal.direction)
+    log.info("email.sent", to=settings.notify_email, direction=signal.direction)
     return "ok"
