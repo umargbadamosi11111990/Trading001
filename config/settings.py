@@ -11,8 +11,9 @@ class Settings:
     alpaca_api_key: str
     alpaca_secret_key: str
     alpaca_base_url: str
-    sms_to_number: str
-    textbelt_key: str
+    gmail_address: str
+    gmail_app_password: str
+    sms_gateway: str
     symbol: str = "SPY"
     timeframe: str = "1h"
     lookback_bars: int = 250
@@ -25,6 +26,7 @@ settings = Settings(
     alpaca_api_key=os.environ.get("ALPACA_API_KEY", ""),
     alpaca_secret_key=os.environ.get("ALPACA_SECRET_KEY", ""),
     alpaca_base_url=os.environ.get("ALPACA_BASE_URL", "https://data.alpaca.markets"),
-    sms_to_number=os.environ.get("SMS_TO_NUMBER", "2404592841"),
-    textbelt_key=os.environ.get("TEXTBELT_KEY", "textbelt"),
+    gmail_address=os.environ.get("GMAIL_ADDRESS", ""),
+    gmail_app_password=os.environ.get("GMAIL_APP_PASSWORD", ""),
+    sms_gateway=os.environ.get("SMS_GATEWAY", "2404592841@txt.att.net"),
 )

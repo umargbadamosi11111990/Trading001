@@ -1,5 +1,6 @@
-import requests
+import smtplib
 import structlog
+from email.mime.text import MIMEText
 
 from config.settings import settings
 from signals.evaluator import Signal
@@ -24,18 +25,14 @@ def format_sms(signal: Signal) -> str:
 
 def send_signal_sms(signal: Signal) -> str:
     body = format_sms(signal)
-    resp = requests.post(
-        "https://textbelt.com/text",
-        data={
-            "phone": settings.sms_to_number,
-            "message": body,
-            "key": settings.textbelt_key,
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
-    result = resp.json()
-    if not result.get("success"):
-        raise RuntimeError(f"TextBelt error: {result.get('error')} | quotaRemaining={result.get('quotaRemaining')}")
-    log.info("sms.sent", to=settings.sms_to_number, direction=signal.direction, quota=result.get("quotaRemaining"))
-    return str(result.get("textId", ""))
+    msg = MIMEText(body)
+    msg["From"] = settings.gmail_address
+    msg["To"] = settings.sms_gateway
+    msg["Subject"] = ""
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(settings.gmail_address, settings.gmail_app_password)
+        server.sendmail(settings.gmail_address, settings.sms_gateway, msg.as_string())
+
+    log.info("sms.sent", to=settings.sms_gateway, direction=signal.direction)
+    return "ok"
