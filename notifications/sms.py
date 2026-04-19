@@ -1,5 +1,5 @@
+import requests
 import structlog
-from twilio.rest import Client
 
 from config.settings import settings
 from signals.evaluator import Signal
@@ -23,12 +23,19 @@ def format_sms(signal: Signal) -> str:
 
 
 def send_signal_sms(signal: Signal) -> str:
-    client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
     body = format_sms(signal)
-    message = client.messages.create(
-        body=body,
-        from_=settings.twilio_from_number,
-        to=settings.twilio_to_number,
+    resp = requests.post(
+        "https://textbelt.com/text",
+        data={
+            "phone": settings.sms_to_number,
+            "message": body,
+            "key": settings.textbelt_key,
+        },
+        timeout=15,
     )
-    log.info("sms.sent", sid=message.sid, to=settings.twilio_to_number, direction=signal.direction)
-    return message.sid
+    resp.raise_for_status()
+    result = resp.json()
+    if not result.get("success"):
+        raise RuntimeError(f"TextBelt error: {result.get('error')} | quotaRemaining={result.get('quotaRemaining')}")
+    log.info("sms.sent", to=settings.sms_to_number, direction=signal.direction, quota=result.get("quotaRemaining"))
+    return str(result.get("textId", ""))
